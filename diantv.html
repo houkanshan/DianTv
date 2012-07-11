@@ -1,0 +1,36 @@
+<head>
+    <title>Diantv</title>
+</head>
+
+<body>
+    <div id="header">
+        <div class="post-dialog">
+            {{> input}}
+        </div>
+    </div>
+    <div id="content">
+        <div class="hall">
+        </div>
+    </div>
+</body>
+
+<template name="input">
+    <input placeholder="Name" type="text" name="dianid" class="name" />
+    <input placeholder="Content" type="text" name="content" class="content" required/>
+    <input type="button" value="走你!"/>
+</template>
+    
+
+<template name="speakhall">
+    {{#each speaks}}
+    <div class="speak {{style}}">
+        <div class="speak-head">
+            <span class="name">{{name}}</span>
+            <span class="time">{{time}}</span>
+        </div>
+        <div class="speak-body">
+            <span class="speak-content">{{content}}</span>
+        </div>
+    </div>
+    {{/each}}
+</template>
