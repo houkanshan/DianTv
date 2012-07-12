@@ -1,9 +1,14 @@
-//TODO: make it easily to amdin
 //TODO: headline
+//TODO: make it easily to amdin
 //TODO: shielded the db operate at client
 Notice = new Meteor.Collection('notice');
 var Notification = {
     nextItemIndex: 0,
+    noticeEl: null,
+    alertContent: '',
+    initialize: function() {
+        this.noticeEl = $('.notice');
+    },
 
     getNotice: function() {
         var notice = Notice.find({},
@@ -11,16 +16,41 @@ var Notification = {
             sort: {
                 elapsedTime: 1
             },
-            skip: nextItemIndex
+            skip: this.nextItemIndex,
+            limit: 1
+        }).fetch();
+        this.nextItemIndex++;
+        this.nextItemIndex %= Notice.find().count();
+        return Template.notice({
+            'content': notice[0].content,
+            'alert': this.alertContent
         });
-        nextItemIndex++;
-        nextItemIndex %= Notice.find().count();
-        return notice;
     },
     renderNotice: function() {
-        var noticeEl = '';
+        var noticeContentEl = this.getNotice();
+        //noticeContentEl = $(noticeContentEl);
+        this.noticeEl.html(noticeContentEl);
+    },
+    showNotice: function() {
+        this.noticeEl.removeClass('hide');
+    },
+    hideNotice: function() {
+        this.noticeEl.addClass('hide');
+    },
+    alertOn: function(msg) {
+        this.alertContent = msg;
+    },
+    alertOff: function() {
+        this.alertContent = '';
+    },
+    changeNotice: function() {
+        this.hideNotice();
+        setTimeout($.proxy(function() {
+            this.renderNotice();
+            this.showNotice();
+        },
+        this), 1000);
     }
-
 };
 
 Speaks = new Meteor.Collection('speaks');
@@ -173,33 +203,50 @@ var Slide = {
     }
 };
 
+var router = function() {
+    if (window.location.hash === "#tv") {
+        $('.post-dialog').addClass('fn-hide');
+        var elem = document.documentElement;
+        var requestFullScreen = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen;
+        var req = requestFullScreen.name;
+
+        elem.onclick = function() {
+            this[req]();
+        };
+        //can't autofullscreen, only click, iframe, key 
+        //can trigger this event
+    }
+};
+
 if (Meteor.is_client) {
     var $name = null;
 
     Meteor.startup(function() {
+        var notiShowCnt = 0;
+
         console.log('ok?');
         $name = $('.name');
         $content = $('.content');
-        if (window.location.hash === "#tv") {
-            $('.post-dialog').addClass('fn-hide');
-            var elem = document.documentElement;
-            var requestFullScreen = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen;
-            var req = requestFullScreen.name;
 
-            elem.onclick = function() {
-                this[req]();
-            };
-            //can't autofullscreen, only click, iframe, key 
-            //can trigger this event
-        }
+        router();
+
         Slide.initialize();
+        Notification.initialize();
 
         var timer = setInterval(function() {
             console.log('time kick');
             Slide.scroll();
-            //console.log('status', Meteor.status());
+            ((notiShowCnt++) % 3) || Notification.changeNotice();
+
+            if(Meteor.status().connected){
+                Notification.alertOff();
+            }else{
+                Notification.alertOn('服务器断开');
+            }
         },
         3 * 1000);
+        
+        // debuger
         close = function() {
             clearInterval(timer);
         };
@@ -214,7 +261,7 @@ if (Meteor.is_client) {
             var date = new Date();
             var timeStr =
             /*date.getFullYear() + '年' +*/
-            (date.getMonth() + 1) + '月' + date.getDate() + '日 ' + (date.getHours() / 100).toString().substr( - 2) + ':' + (date.getMinutes() / 100).toString().substr( - 2);
+            (date.getMonth() + 1) + '月' + date.getDate() + '日 ' + (date.getHours() / 100).toFixed(2).substr( - 2) + ':' + (date.getMinutes() / 100).toFixed(2).substr( - 2);
             var contentStr = $content.val();
             var styleStr = contentStr.length < 16 ? 'brick-tiny': 'brick-normal';
             console.log($content.val());

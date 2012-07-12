@@ -11,7 +11,7 @@
     <div id="content">
         <div class="hall">
         </div>
-        <div class="notice">
+        <div class="notice hide">
         </div>
     </div>
 </body>
@@ -19,6 +19,9 @@
 <template name="notice">
     <span class="notice-content">
         {{content}}
+    </span>
+    <span class="notice-alert">
+        {{alert}}
     </span>
 </template>
 
