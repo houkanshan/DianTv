@@ -1,14 +1,39 @@
+//TODO: make it easily to amdin
+//TODO: headline
+//TODO: shielded the db operate at client
+Notice = new Meteor.Collection('notice');
+var Notification = {
+    nextItemIndex: 0,
+
+    getNotice: function() {
+        var notice = Notice.find({},
+        {
+            sort: {
+                elapsedTime: 1
+            },
+            skip: nextItemIndex
+        });
+        nextItemIndex++;
+        nextItemIndex %= Notice.find().count();
+        return notice;
+    },
+    renderNotice: function() {
+        var noticeEl = '';
+    }
+
+};
+
 Speaks = new Meteor.Collection('speaks');
 var Slide = {
-    screenHeight: - 1,
-    screenWidth: - 1,
+    parentHeight: - 1,
+    parentWidth: - 1,
     hallEl: null,
     itemMatrix: [],
     nextItemIndex: 0,
     initialize: function() {
-        this.screenHeight = $(window).height();
-        this.screenWidth = $(window).width();
         this.hallEl = $('.hall');
+        this.parentHeight = this.hallEl.parent().height();
+        this.parentWidth = this.hallEl.parent().width();
     },
     lastOffset: function() {
         var $lastSpeak = $('.speak:last-child');
@@ -37,8 +62,8 @@ var Slide = {
             width: 1
         }
     },
+    isLastLine: false,
     getBrick: function() {
-        console.log('[getBricks]', arguments);
         var item = Speaks.find({},
         {
             sort: {
@@ -47,9 +72,18 @@ var Slide = {
             limit: 1,
             skip: (this.nextItemIndex)
         }).fetch();
-        this.nextItemIndex++;
-        this.nextItemIndex %= (Speaks.find().count() || 1);
 
+        // step in the pos of brick
+        this.nextItemIndex++;
+        // judege if it is the last brick
+        if (this.nextItemIndex === Speaks.find().count()) {
+            this.nextItemIndex %= (Speaks.find().count() || 1);
+            this.isLastLine = true;
+        } else {
+            this.isLastLine = false;
+        }
+
+        console.log('[getBricks]', this.nextItemIndex, item.content, this.isLastLine);
         return {
             frame: Meteor.ui.render(function() {
                 return Template.speakhall({
@@ -71,13 +105,14 @@ var Slide = {
             var lastWidth = 0;
             var tmpHtml = '';
             while (height < 2) {
+                // get brick here
                 var brick = this.getBrick();
                 height += brick.style.height;
                 tmpHtml += brick.html;
                 lastWidth = brick.style.width;
             }
-            if(width + lastWidth > 4){
-                // fallback
+            if (width + lastWidth > 4) {
+                // if width cross border, fallback
                 var count = Speaks.find().count();
                 this.nextItemIndex += count - 1;
                 this.nextItemIndex %= (count || 1);
@@ -85,6 +120,10 @@ var Slide = {
             }
             width += lastWidth;
             lineHtml += tmpHtml;
+
+            if (this.isLastLine) {
+                break;
+            }
         }
         //console.log(lineHtml);
         var lineEl = $(lineHtml);
@@ -92,28 +131,34 @@ var Slide = {
     },
     renderLine: function() {
         var lineEl = this.getLine();
+        if (this.isLastLine) {
+            lineEl = lineEl.add(
+            $('<span>').addClass('divide').append(
+            $('<span>').addClass('divide-text').text('分界线')));
+        }
         lineEl.appendTo(this.hallEl);
         this.itemMatrix.push(lineEl);
     },
-    removeFirstLine: function(){
+    removeFirstLine: function() {
         //animation
         var firstLineEl = this.itemMatrix[0];
         this.hallEl.addClass('up');
         //firstLineEl.each(function(index, item){
-            //debugger;
-            //$(item).addClass('up');
+        //debugger;
+        //$(item).addClass('up');
         //});
-        setTimeout($.proxy(function(){
+        setTimeout($.proxy(function() {
             this.itemMatrix[0].remove();
             this.hallEl.removeClass('up');
             this.itemMatrix.splice(0, 1);
-        }, this), 1000);
+        },
+        this), 1000);
     },
     scroll: function() {
         //Tip: control item by row
         //append item
-        if (this.itemMatrix.length < 3) {
-            while (this.itemMatrix.length < 3) {
+        if (this.itemMatrix.length < 4) {
+            while (this.itemMatrix.length < 4) {
                 this.renderLine();
             }
             return;
@@ -138,12 +183,10 @@ if (Meteor.is_client) {
         if (window.location.hash === "#tv") {
             $('.post-dialog').addClass('fn-hide');
             var elem = document.documentElement;
-            var requestFullScreen = elem.requestFullScreen || 
-                elem.webkitRequestFullScreen ||
-                elem.mozRequestFullScreen;
+            var requestFullScreen = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen;
             var req = requestFullScreen.name;
 
-            elem.onclick = function(){
+            elem.onclick = function() {
                 this[req]();
             };
             //can't autofullscreen, only click, iframe, key 
@@ -154,7 +197,7 @@ if (Meteor.is_client) {
         var timer = setInterval(function() {
             console.log('time kick');
             Slide.scroll();
-            console.log('status', Meteor.status());
+            //console.log('status', Meteor.status());
         },
         3 * 1000);
         close = function() {
