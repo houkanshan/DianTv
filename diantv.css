@@ -129,15 +129,27 @@ body:-moz-full-screen {
     position:relative;
     z-index:1000;
 }
+
+.logo {
+    font-size: 25px;
+    float: left;
+    color: #9a1;
+}
+.logo .tv {
+    color: #6898DD;
+}
+
 #content {
     overflow:hidden;
     height: 100%;
     position: relative;
 }
 
-input {
+.logo, input {
     height: 25px;
     padding: 0 5px;
+    display: inline-block;
+    margin: 5px 0;
 }
 input[type="text"] {
 
@@ -195,10 +207,6 @@ input[type="button"] {
     transition: margin 1s;
 }
 
-input {
-    display: inline-block;
-    margin: 5px 0;
-}
 .name {
     width: 5em;
 }
@@ -320,6 +328,7 @@ input {
 
     font-size: 12px;
     color: #c90000;
+    text-align: center;
 
 }
 /* style-notice end */

@@ -146,6 +146,7 @@ var Slide = {
                 var count = Speaks.find().count();
                 this.nextItemIndex += count - 1;
                 this.nextItemIndex %= (count || 1);
+                this.isLastLine = false;
                 break;
             }
             width += lastWidth;
@@ -187,8 +188,8 @@ var Slide = {
     scroll: function() {
         //Tip: control item by row
         //append item
-        if (this.itemMatrix.length < 4) {
-            while (this.itemMatrix.length < 4) {
+        if (this.itemMatrix.length < 5) {
+            while (this.itemMatrix.length < 5) {
                 this.renderLine();
             }
             return;
@@ -227,6 +228,8 @@ if (Meteor.is_client) {
         console.log('ok?');
         $name = $('.name');
         $content = $('.content');
+
+        $name.val(localStorage.name);
 
         router();
 
@@ -272,6 +275,7 @@ if (Meteor.is_client) {
                 elapsedTime: Date.now(),
                 style: styleStr
             });
+            localStorage.name = $name.val();
             $content.val(null);
         }
     };
