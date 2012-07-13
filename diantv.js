@@ -1,7 +1,22 @@
 //TODO: headline
 //TODO: make it easily to amdin
 //TODO: shielded the db operate at client
-Notice = new Meteor.Collection('notice');
+var Notice = new Meteor.Collection('notice');
+var tvinsert = function(m){
+    Notice.insert({
+        content: m,
+        elapsedTime: Date.now()
+    });
+}
+var tvremove = function(n){
+    var i = Notice.findOne({}, {skip: n});
+    if(i){
+        console.log('[remove]', i.content);
+        Notice.remove(i._id);
+    }else{
+        console.log('[err] cant find this notice');
+    }
+}
 var Notification = {
     nextItemIndex: 0,
     noticeEl: null,
@@ -11,17 +26,19 @@ var Notification = {
     },
 
     getNotice: function() {
+        var nowIndex = this.nextItemIndex;
         var notice = Notice.find({},
         {
             sort: {
                 elapsedTime: 1
             },
-            skip: this.nextItemIndex,
+            skip: nowIndex,
             limit: 1
         }).fetch();
         this.nextItemIndex++;
         this.nextItemIndex %= Notice.find().count();
         return Template.notice({
+            'index': nowIndex, 
             'content': notice[0].content,
             'alert': this.alertContent
         });
@@ -106,7 +123,7 @@ var Slide = {
         // step in the pos of brick
         this.nextItemIndex++;
         // judege if it is the last brick
-        if (this.nextItemIndex === Speaks.find().count()) {
+        if (this.nextItemIndex >= Speaks.find().count()) {
             this.nextItemIndex %= (Speaks.find().count() || 1);
             this.isLastLine = true;
         } else {
@@ -188,8 +205,8 @@ var Slide = {
     scroll: function() {
         //Tip: control item by row
         //append item
-        if (this.itemMatrix.length < 5) {
-            while (this.itemMatrix.length < 5) {
+        if (this.itemMatrix.length < 4) {
+            while (this.itemMatrix.length < 4) {
                 this.renderLine();
             }
             return;
@@ -255,28 +272,41 @@ if (Meteor.is_client) {
         };
     });
 
+    //TODO: a msg model needed
+    var sendMsg = function(){
+        if ($content.val().trim() === '') {
+            return;
+        }
+        var date = new Date();
+        var timeStr =
+            /*date.getFullYear() + '年' +*/
+            (date.getMonth() + 1) + '月' + date.getDate() + '日 ' + (date.getHours() / 100).toFixed(2).substr( - 2) + ':' + (date.getMinutes() / 100).toFixed(2).substr( - 2);
+        var contentStr = $content.val();
+        var styleStr = contentStr.length < 16 ? 'brick-tiny': 'brick-normal';
+        console.log($content.val());
+        Speaks.insert({
+            name: $name.val().substr(0, 9) || '无名氏',
+            content: $content.val().substr(0, 120),
+            time: timeStr,
+            elapsedTime: Date.now(),
+            style: styleStr
+        });
+        localStorage.name = $name.val();
+        $content.val(null);
+    }
+
     Template.input.events = {
         'click input[type="text"]': function() {},
         'click input[type="button"]': function() {
-            if ($content.val().trim() === '') {
-                return;
+            sendMsg();
+        },
+        'keyup': function(e){
+            console.log(e.keyCode);
+            switch(e.keyCode){
+                case 13: 
+                    sendMsg();
+                    break;
             }
-            var date = new Date();
-            var timeStr =
-            /*date.getFullYear() + '年' +*/
-            (date.getMonth() + 1) + '月' + date.getDate() + '日 ' + (date.getHours() / 100).toFixed(2).substr( - 2) + ':' + (date.getMinutes() / 100).toFixed(2).substr( - 2);
-            var contentStr = $content.val();
-            var styleStr = contentStr.length < 16 ? 'brick-tiny': 'brick-normal';
-            console.log($content.val());
-            Speaks.insert({
-                name: $name.val() || '无名氏',
-                content: $content.val(),
-                time: timeStr,
-                elapsedTime: Date.now(),
-                style: styleStr
-            });
-            localStorage.name = $name.val();
-            $content.val(null);
         }
     };
 }
@@ -288,7 +318,7 @@ if (Meteor.is_server) {
             Speaks.remove({});
             Speaks.insert({
                 name: 'Houks',
-                content: 'test!',
+                content: '各位好，我是新的DianTv君，你们可以通过http://192.168.7.2:8888/来访问我，DianTv君不喜欢说话，你们来说好了，不过不要有诽谤、脏话、侵犯隐私等危险言论嗯，可以有技术含量的TX...',
                 time: 'From 192.168.7.1',
                 elapsedTime: Date.now(),
                 style: 'brick-huge'
