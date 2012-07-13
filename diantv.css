@@ -133,7 +133,7 @@ body:-moz-full-screen {
 .logo {
     font-size: 25px;
     float: left;
-    color: #9a1;
+    color: #ffb899;
 }
 .logo .tv {
     color: #6898DD;
@@ -145,11 +145,15 @@ body:-moz-full-screen {
     position: relative;
 }
 
-.logo, input {
+.logo, input, .github {
     height: 25px;
+    line-height: 25px;
     padding: 0 5px;
     display: inline-block;
     margin: 5px 0;
+}
+.github {
+    float: right;
 }
 input[type="text"] {
 
@@ -198,6 +202,7 @@ input[type="button"] {
 }
 .hall {
     overflow: hidden;
+    background: url(http://dribbble.com/images/tile.gif);
 } 
 
 .hall.up {
@@ -221,6 +226,11 @@ input[type="button"] {
     margin: 0.8%;
 
     border: 1px solid #bbb;
+    border-radius: 5px;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    -moz-box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    background: white;
 
     padding: 5px;
     font-size: 25px;
