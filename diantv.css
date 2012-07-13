@@ -3,6 +3,7 @@ html{
     color:#000;background:#fff;
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
+	font-family: "Microsoft Yahei", SimHei;
 }
 
 /* 内外边距通常让各个浏览器样式的表现位置不同 */
@@ -306,7 +307,7 @@ input[type="button"] {
 
     border-radius: 5px;
     background: black;
-    opacity: 0.8;
+    opacity: 0.9;
     -webkit-transition: opacity 1s;
     -moz-transition: opacity 1s;
     transition: opacity 1s;
