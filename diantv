@@ -1,0 +1,38 @@
+#!/bin/sh -e
+
+
+# to add a service for it
+# vim this file to /etc/init.d/
+# (on ubuntu)
+# chmod 777 it
+# ln -s it to /etc/rcX.d
+
+
+
+start()
+{
+    echo "start dianTv"
+    cd /home/houkanshan/studio/meteor/dianTv/diantv/
+    meteor --port 7777 &
+    exit 0;
+}
+
+stop(){
+    echo "try to stop service, but it does't work"
+}
+
+case "$1" in
+start)
+    start
+    ;;
+stop)
+    stop
+    ;;
+restart)
+    stop
+    start
+    ;;
+*)
+    echo "usage: $0 start|stop|restart"
+    exit 0;
+esac
