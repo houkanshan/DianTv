@@ -1,22 +1,28 @@
 //TODO: headline
 //TODO: make it easily to amdin
 //TODO: shielded the db operate at client
-var Notice = new Meteor.Collection('notice');
-var tvinsert = function(m){
-    Notice.insert({
-        content: m,
-        elapsedTime: Date.now()
-    });
-}
-var tvremove = function(n){
-    var i = Notice.findOne({}, {skip: n});
-    if(i){
-        console.log('[remove]', i.content);
-        Notice.remove(i._id);
-    }else{
-        console.log('[err] cant find this notice');
-    }
-}
+
+var N = new Meteor.Collection('notice');
+var tvinsert = function(m) {
+	N.insert({
+		content: m,
+		elapsedTime: Date.now()
+	})
+};
+var tvremove = function(n) {
+	var i = N.findOne({},
+	{
+		skip: n
+	});
+	if (i) {
+		console.log('[remove]', i.content);
+		N.remove(i._id)
+	} else {
+		console.log('[err] cant find this notice')
+	}
+};
+
+
 var Notification = {
     nextItemIndex: 0,
     noticeEl: null,
@@ -27,7 +33,7 @@ var Notification = {
 
     getNotice: function() {
         var nowIndex = this.nextItemIndex;
-        var notice = Notice.find({},
+        var notice = N.find({},
         {
             sort: {
                 elapsedTime: 1
@@ -36,10 +42,10 @@ var Notification = {
             limit: 1
         }).fetch();
         this.nextItemIndex++;
-        this.nextItemIndex %= Notice.find().count();
+        this.nextItemIndex %= N.find().count();
         return Template.notice({
             'index': nowIndex, 
-            'content': notice[0].content,
+            'content': notice[0].content.trim(),
             'alert': this.alertContent
         });
     },
