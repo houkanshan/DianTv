@@ -144,6 +144,7 @@ body:-moz-full-screen {
     overflow:hidden;
     height: 100%;
     position: relative;
+	background: #eee;
 }
 
 .logo, input, .github {
@@ -244,7 +245,7 @@ input[type="button"] {
     height: 20px;
 }
 .speak-head .name {
-    color: #5D9AEE;
+    color: #006bff;
 }
 .speak-head .time {
     color: #bbb;
@@ -315,6 +316,7 @@ input[type="button"] {
     display: table;
     table-layout: fixed;
     word-wrap: break-word;
+	padding: 5px;
 }
 .notice.hide {
     opacity: 0;

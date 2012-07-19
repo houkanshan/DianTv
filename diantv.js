@@ -1,17 +1,17 @@
 //TODO: headline
 //TODO: make it easily to amdin
 //TODO: shielded the db operate at client
-var Notice = new Meteor.Collection('notice');
+var N = new Meteor.Collection('notice');
 var tvinsert = function(m){
-    Notice.insert({
+    N.insert({
         content: m,
         elapsedTime: Date.now()
     });
 }
 var tvremove = function(n){
-    var i = Notice.findOne({}, {skip: n});
+    var i = N.findOne({}, {skip: n});
     if(i){
-        Notice.remove(i._id);
+        N.remove(i._id);
     }else{
     }
 }
@@ -25,7 +25,7 @@ var Notification = {
 
     getNotice: function() {
         var nowIndex = this.nextItemIndex;
-        var notice = Notice.find({},
+        var notice = N.find({},
         {
             sort: {
                 elapsedTime: 1
@@ -34,7 +34,7 @@ var Notification = {
             limit: 1
         }).fetch();
         this.nextItemIndex++;
-        this.nextItemIndex %= Notice.find().count();
+        this.nextItemIndex %= N.find().count();
         return Template.notice({
             'index': nowIndex, 
             'content': notice[0].content,
@@ -59,6 +59,7 @@ var Notification = {
         this.alertContent = '';
     },
     changeNotice: function() {
+		if(N.find().count() === 0){return;}
         this.hideNotice();
         setTimeout($.proxy(function() {
             this.renderNotice();
@@ -117,6 +118,7 @@ var Slide = {
             limit: 1,
             skip: (this.nextItemIndex)
         }).fetch();
+		
 
         // step in the pos of brick
         this.nextItemIndex++;
@@ -203,6 +205,7 @@ var Slide = {
     scroll: function() {
         //Tip: control item by row
         //append item
+		if(Speaks.find().count() === 0){return;}
         if (this.itemMatrix.length < 4) {
             while (this.itemMatrix.length < 4) {
                 this.renderLine();
@@ -251,6 +254,10 @@ if (Meteor.is_client) {
         Slide.initialize();
         Notification.initialize();
 
+		setTimeout(function(){
+			// wait for speaks ready
+            Slide.scroll();
+		}, 1000);
         var timer = setInterval(function() {
             //console.log('time kick');
             Slide.scroll();
@@ -316,12 +323,21 @@ if (Meteor.is_server) {
             Speaks.remove({});
             Speaks.insert({
                 name: 'Houks',
-                content: '各位好，我是新的DianTv君，你们可以通过http://192.168.7.7:7777/来访问我，DianTv君不喜欢说话，你们来说好了，不过不要有诽谤、脏话、侵犯隐私等危险言论嗯，可以有技术含量的TX...',
+                content: '各位好，我是新的DianTv君，你们可以通过http://www.dian.org.cn/tv/来访问我，DianTv君不喜欢说话，你们来说好了，不过不要有诽谤、脏话、侵犯隐私等危险言论嗯，可以有技术含量的TX...',
                 time: 'From 192.168.7.77:7777',
                 elapsedTime: Date.now(),
                 style: 'brick-huge'
             });
         }
+		
+		setInterval(function(){
+			var date = new Date();
+			date.setHours(0);
+			date.setMinutes(1);
+			date.setDate(date.getDate() - 1);
+			Speaks.remove({elapsedTime: {$lt: date.getTime()}});
+
+		}, 1000 * 60 * 60 * 24);
     });
 }
 
