@@ -1,28 +1,20 @@
 //TODO: headline
 //TODO: make it easily to amdin
 //TODO: shielded the db operate at client
-
 var N = new Meteor.Collection('notice');
-var tvinsert = function(m) {
-	N.insert({
-		content: m,
-		elapsedTime: Date.now()
-	})
-};
-var tvremove = function(n) {
-	var i = N.findOne({},
-	{
-		skip: n
-	});
-	if (i) {
-		console.log('[remove]', i.content);
-		N.remove(i._id)
-	} else {
-		console.log('[err] cant find this notice')
-	}
-};
-
-
+var tvinsert = function(m){
+    N.insert({
+        content: m,
+        elapsedTime: Date.now()
+    });
+}
+var tvremove = function(n){
+    var i = N.findOne({}, {skip: n});
+    if(i){
+        N.remove(i._id);
+    }else{
+    }
+}
 var Notification = {
     nextItemIndex: 0,
     noticeEl: null,
@@ -67,6 +59,7 @@ var Notification = {
         this.alertContent = '';
     },
     changeNotice: function() {
+		if(N.find().count() === 0){return;}
         this.hideNotice();
         setTimeout($.proxy(function() {
             this.renderNotice();
@@ -125,6 +118,7 @@ var Slide = {
             limit: 1,
             skip: (this.nextItemIndex)
         }).fetch();
+		
 
         // step in the pos of brick
         this.nextItemIndex++;
@@ -136,7 +130,7 @@ var Slide = {
             this.isLastLine = false;
         }
 
-        console.log('[getBricks]', this.nextItemIndex, item.content, this.isLastLine);
+        //console.log('[getBricks]', this.nextItemIndex, item.content, this.isLastLine);
         return {
             frame: Meteor.ui.render(function() {
                 return Template.speakhall({
@@ -188,7 +182,7 @@ var Slide = {
         if (this.isLastLine) {
             lineEl = lineEl.add(
             $('<span>').addClass('divide').append(
-            $('<span>').addClass('divide-text').text('分界线')));
+            $('<span>').addClass('divide-text').text('分锅线')));
         }
         lineEl.appendTo(this.hallEl);
         this.itemMatrix.push(lineEl);
@@ -211,6 +205,7 @@ var Slide = {
     scroll: function() {
         //Tip: control item by row
         //append item
+		if(Speaks.find().count() === 0){return;}
         if (this.itemMatrix.length < 4) {
             while (this.itemMatrix.length < 4) {
                 this.renderLine();
@@ -248,7 +243,7 @@ if (Meteor.is_client) {
     Meteor.startup(function() {
         var notiShowCnt = 0;
 
-        console.log('ok?');
+        //console.log('ok?');
         $name = $('.name');
         $content = $('.content');
 
@@ -259,10 +254,14 @@ if (Meteor.is_client) {
         Slide.initialize();
         Notification.initialize();
 
-        var timer = setInterval(function() {
-            console.log('time kick');
+		setTimeout(function(){
+			// wait for speaks ready
             Slide.scroll();
-            ((notiShowCnt++) % 3) || Notification.changeNotice();
+		}, 1000);
+        var timer = setInterval(function() {
+            //console.log('time kick');
+            Slide.scroll();
+            ((notiShowCnt++) % 2) || Notification.changeNotice();
 
             if(Meteor.status().connected){
                 Notification.alertOff();
@@ -270,7 +269,7 @@ if (Meteor.is_client) {
                 Notification.alertOn('服务器断开');
             }
         },
-        3 * 1000);
+        5 * 1000);
         
         // debuger
         close = function() {
@@ -289,9 +288,9 @@ if (Meteor.is_client) {
             (date.getMonth() + 1) + '月' + date.getDate() + '日 ' + (date.getHours() / 100).toFixed(2).substr( - 2) + ':' + (date.getMinutes() / 100).toFixed(2).substr( - 2);
         var contentStr = $content.val();
         var styleStr = contentStr.length < 16 ? 'brick-tiny': 'brick-normal';
-        console.log($content.val());
+        //console.log($content.val());
         Speaks.insert({
-            name: $name.val().substr(0, 9) || '无名氏',
+			name: $name.val().substr(0, 12) || '无名氏',
             content: $content.val().substr(0, 120),
             time: timeStr,
             elapsedTime: Date.now(),
@@ -307,7 +306,7 @@ if (Meteor.is_client) {
             sendMsg();
         },
         'keyup': function(e){
-            console.log(e.keyCode);
+            //console.log(e.keyCode);
             switch(e.keyCode){
                 case 13: 
                     sendMsg();
@@ -324,12 +323,21 @@ if (Meteor.is_server) {
             Speaks.remove({});
             Speaks.insert({
                 name: 'Houks',
-                content: '各位好，我是新的DianTv君，你们可以通过http://192.168.7.2:8888/来访问我，DianTv君不喜欢说话，你们来说好了，不过不要有诽谤、脏话、侵犯隐私等危险言论嗯，可以有技术含量的TX...',
-                time: 'From 192.168.7.1',
+                content: '各位好，我是新的DianTv君，你们可以通过http://www.dian.org.cn/tv/来访问我，DianTv君不喜欢说话，你们来说好了，不过不要有诽谤、脏话、侵犯隐私等危险言论嗯，可以有技术含量的TX...',
+                time: 'From 192.168.7.77:7777',
                 elapsedTime: Date.now(),
                 style: 'brick-huge'
             });
         }
+		
+		setInterval(function(){
+			var date = new Date();
+			date.setHours(0);
+			date.setMinutes(1);
+			date.setDate(date.getDate() - 1);
+			Speaks.remove({elapsedTime: {$lt: date.getTime()}});
+
+		}, 1000 * 60 * 60 * 24);
     });
 }
 

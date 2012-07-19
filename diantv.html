@@ -1,5 +1,6 @@
 <head>
     <title>Diantv</title>
+	<base href="http://192.168.0.3/tv/"></base>
 </head>
 
 <body>
@@ -18,12 +19,8 @@
 
 <template name="notice">
     <h2 class="notice-head">头条新闻  -{{index}}- </h2>
-    <span class="notice-content">
-        {{content}}
-    </span>
-    <span class="notice-alert">
-        {{alert}}
-    </span>
+    <span class="notice-content">{{content}}</span>
+    <span class="notice-alert">{{alert}}</span>
 </template>
 
 <template name="input">
