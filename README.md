@@ -13,4 +13,12 @@
 2. 运行
 
     $ cd diantv
+
     $ meteor
+
+3. some hack for diantv
+
+* /usr/lib/meteor/app/lib/app.html.in
+
+* 
+

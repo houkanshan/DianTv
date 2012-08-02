@@ -1,6 +1,12 @@
 <head>
     <title>Diantv</title>
-	<base href="http://192.168.0.3/tv/"></base>
+    <base href="http://192.168.0.3/tv/"></base>
+    <script>
+        __meteor_runtime_config__ = __meteor_runtime_config__ || {};
+        __meteor_runtime_config__.DEFAULT_DDP_ENDPOINT = 'http://' + 
+            window.location.host +
+            window.location.pathname;
+    </script>
 </head>
 
 <body>

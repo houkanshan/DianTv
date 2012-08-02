@@ -12,7 +12,7 @@
 start()
 {
     echo "start dianTv"
-    cd /home/houkanshan/studio/meteor/dianTv/diantv/
+    cd /home/diantv/website/diantv/
     meteor --port 7777 &
     exit 0;
 }

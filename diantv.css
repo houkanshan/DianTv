@@ -204,7 +204,7 @@ input[type="button"] {
 }
 .hall {
     overflow: hidden;
-    background: url(/wood_bg.jpg);
+    background: url(./wood_bg.jpg);
 } 
 
 .hall.up {
@@ -294,9 +294,9 @@ input[type="button"] {
     display: block;
     font-size: 14px;
 
-    text-shadow: 0 1px 1px #333;
+    text-shadow: 0 1px 3px black;
     text-align: center;
-    color: white;
+    color: #cea472;
 }
 
 
@@ -331,6 +331,7 @@ input[type="button"] {
     vertical-align: middle;
 
     text-align: center;
+    padding: 22px 0;
     font-size: 24px;
     color: white;
     white-space: pre-wrap;

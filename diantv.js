@@ -1,6 +1,8 @@
 //TODO: headline
 //TODO: make it easily to amdin
 //TODO: shielded the db operate at client
+
+
 var N = new Meteor.Collection('notice');
 var tvinsert = function(m){
     N.insert({
